@@ -10,15 +10,17 @@ fmtname(char *path)
   char *p;
 
   // Find first character after last slash.
-  for(p=path+strlen(path); p >= path && *p != '/'; p--)
-    ;
+  // p=path+strlen(path); 此时指向path的最后一个字符
+  for(p=path+strlen(path); p >= path && *p != '/'; p--){
+    //printf("p:%s\npath:%s\n",p,path);
+  }
   p++;
 
   // Return blank-padded name.
-  if(strlen(p) >= DIRSIZ)
+  if(strlen(p) >= DIRSIZ) //
     return p;
   memmove(buf, p, strlen(p));
-  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p)); // 将剩余的字符置为空格
   return buf;
 }
 
@@ -58,6 +60,7 @@ ls(char *path)
       if(de.inum == 0)
         continue;
       memmove(p, de.name, DIRSIZ);
+      //printf("de.name: %s\n",de.name);
       p[DIRSIZ] = 0;
       if(stat(buf, &st) < 0){
         printf("ls: cannot stat %s\n", buf);
