@@ -80,3 +80,16 @@ kalloc(void)
     memset((char*)r, 5, PGSIZE); // fill with junk
   return (void*)r;
 }
+
+// compute the freemem size
+// one page is 4096-byte
+// fetch the number of free page and multiply page size
+int
+freemem_size(void){
+  struct run *r;
+  int num = 0;
+  for(r = kmem.freelist; r ; r = r->next){
+    num++;
+  }
+  return num * PGSIZE;
+}

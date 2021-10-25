@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "sysinfo.h"
 
 uint64
 sys_exit(void)
@@ -94,4 +95,47 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+// tracing the syscall and print the pid and syscall name
+uint64
+sys_trace(void){
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  // fetch the current proc
+  struct proc *p = myproc();
+  char *mask = p->mask;
+  int i = 0;
+  while (i < 24 && n > 0){
+    if(n%2){
+      mask[i++] = '1';
+    }
+    else{
+      mask[i++] = '0';
+    }
+    n >>= 1;
+  }
+  return 0;
+}
+
+// copy kernel unused memory size and proc_num and fd_num to user
+// successed return 0, otherwise return -1
+uint64
+sys_sysinfo(void){
+  struct sysinfo info;
+  uint64 addr;
+  struct proc *p;
+  // fetch the current proc
+  p = myproc();
+  // fetch the 64-bit argument 0
+  if(argaddr(0, &addr) < 0)
+    return -1;
+  
+  info.freemem = freemem_size();
+  info.nproc = proc_num();
+  // info.freefd = fd_num();
+  if(copyout(p->pagetable, addr, (char *)&info, sizeof(info)) < 0)
+    return -1;
+  return 0;
 }

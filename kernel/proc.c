@@ -274,11 +274,15 @@ fork(void)
     return -1;
   }
   np->sz = p->sz;
+  // copy mask
+  safestrcpy(np->mask, p->mask, sizeof(p->mask));
 
   np->parent = p;
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
+
+  
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
@@ -693,3 +697,29 @@ procdump(void)
     printf("\n");
   }
 }
+
+int
+proc_num(void){
+  struct proc *p;
+  uint64 num = 0;
+  for(p = proc; p < &proc[NPROC]; p++){
+    if(p->state != UNUSED){
+      num++;
+    }
+  }
+  return num;
+}
+
+// int
+// fd_num(void){
+//   struct proc *p;
+//   uint64 num = 0;
+//   for(p = proc; p < &proc[NPROC]; p++){
+//     int fp;
+//     for(fp = 0; fp < NOFILE; fp++){
+//       if(!proc->ofile[fp])
+//         num++;
+//     }
+//   }
+//   return num;
+// }
