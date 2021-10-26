@@ -134,7 +134,7 @@ sys_sysinfo(void){
   
   info.freemem = freemem_size();
   info.nproc = proc_num();
-  // info.freefd = fd_num();
+  info.freefd = fd_num();
   if(copyout(p->pagetable, addr, (char *)&info, sizeof(info)) < 0)
     return -1;
   return 0;

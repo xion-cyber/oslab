@@ -703,23 +703,22 @@ proc_num(void){
   struct proc *p;
   uint64 num = 0;
   for(p = proc; p < &proc[NPROC]; p++){
-    if(p->state != UNUSED){
+    if(p->state == UNUSED){
       num++;
     }
   }
   return num;
 }
 
-// int
-// fd_num(void){
-//   struct proc *p;
-//   uint64 num = 0;
-//   for(p = proc; p < &proc[NPROC]; p++){
-//     int fp;
-//     for(fp = 0; fp < NOFILE; fp++){
-//       if(!proc->ofile[fp])
-//         num++;
-//     }
-//   }
-//   return num;
-// }
+int
+fd_num(void){
+  struct proc *p = myproc();
+  uint64 num = 0;
+
+  int fp;
+  for(fp = 0; fp < NOFILE; fp++)
+    if(p->ofile[fp]){
+      num++;
+  }
+  return NOFILE - num;
+}

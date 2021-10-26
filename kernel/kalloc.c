@@ -87,7 +87,7 @@ kalloc(void)
 int
 freemem_size(void){
   struct run *r;
-  int num = 0;
+  uint64 num = 0;
   for(r = kmem.freelist; r ; r = r->next){
     num++;
   }

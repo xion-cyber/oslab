@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "sysinfo.h": "c"
+        "sysinfo.h": "c",
+        "defs.h": "c",
+        "proc.h": "c"
     }
 }
