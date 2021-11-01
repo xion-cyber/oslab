@@ -82,7 +82,7 @@ binit(void)
     bcache.buf[i].next = bcache.hashbuckets[num].next;
     bcache.buf[i].prev = &bcache.hashbuckets[num];
     // init the lock, their names are buffer
-    initsleeplock(&(bcache.buf[i].lock), "buffer");
+    initsleeplock(&(bcache.buf[i].lock), "bache.buffer");
     bcache.hashbuckets[num].next->prev = &bcache.buf[i];
     bcache.hashbuckets[num].next = &bcache.buf[i];
   }
@@ -156,16 +156,14 @@ bget(uint dev, uint blockno)
     if(b->dev == dev && b->blockno == blockno){
       // add the buffer's refcnt to 1
       b->refcnt++;
-      // update the timestamp
-      b->tick = ticks;
       release(&bcache.lock[num]);
       acquiresleep(&b->lock);
       return b;
     }
   }
 
-  // Not cached.
-  // Recycle the least recently used (LRU) unused buffer.
+  // // Not cached.
+  // // Recycle the least recently used (LRU) unused buffer.
   for(b = bcache.hashbuckets[num].prev; b != &bcache.hashbuckets[num]; b = b->prev){
     if(b->refcnt == 0) {
       b->dev = dev;
@@ -185,7 +183,7 @@ bget(uint dev, uint blockno)
   // if there is no refcnt == 0 block, get from other bucket
   int i,round;
   struct buf *lrubuf = 0;
-  for(i=(num+1)%NBUCKETS, round=0; round < NBUCKETS; i++, round++){
+  for(i=(num+1)%NBUCKETS, round=0; round < NBUCKETS; i = (i+1)%NBUCKETS, round++){
     acquire(&bcache.lock[i]);
     // find the earlist refcnt==0 buf
     for(b=bcache.hashbuckets[i].next; b!=&bcache.hashbuckets[i]; b=b->next){
@@ -220,6 +218,7 @@ bget(uint dev, uint blockno)
       lrubuf->tick = ticks;
       
       release(&bcache.lock[i]);
+      release(&bcache.lock[num]);
       acquiresleep(&lrubuf->lock);
       return lrubuf;
     }
@@ -267,12 +266,13 @@ brelse(struct buf *b)
   if (b->refcnt == 0) {
     // no one is waiting for it.
     // move the block after to the head
-    b->next->prev = b->prev;
-    b->prev->next = b->next;
-    b->next = bcache.hashbuckets[num].next;
-    b->prev = &bcache.hashbuckets[num];
-    bcache.hashbuckets[num].next->prev = b;
-    bcache.hashbuckets[num].next = b;
+    // b->next->prev = b->prev;
+    // b->prev->next = b->next;
+    // b->next = bcache.hashbuckets[num].next;
+    // b->prev = &bcache.hashbuckets[num];
+    // bcache.hashbuckets[num].next->prev = b;
+    // bcache.hashbuckets[num].next = b;
+    b->tick = ticks;
   }
   
   release(&bcache.lock[num]);
